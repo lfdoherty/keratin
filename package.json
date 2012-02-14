@@ -1,0 +1,14 @@
+{
+	"name": "keratin",
+	"version": "0.2.0",
+	"description": "A specialization of the myrtle parser/format, allowing the specification of non-recursive types and their properties, lists, and maps.",
+	"main": "./keratin",
+	"author": "Liam Doherty",
+	"dependencies" : { 
+		"underscorem": ">0.1",
+		"myrtle-parser": ">=0.1"
+	},
+	"engines": {
+		 "node" : "0.6"
+	}
+}
