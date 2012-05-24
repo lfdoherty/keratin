@@ -15,7 +15,7 @@ function parse(str, reservedTypeNames){
 	
 	
 	var schema = myrtle.parse(str);
-	console.log('myrtle: ' + JSON.stringify(schema))
+	//console.log('myrtle: ' + JSON.stringify(schema))
 	schema = keratinize(schema, reservedTypeNames);
 	return schema;
 }
