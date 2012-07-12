@@ -88,6 +88,7 @@ function parseProperties(obj, rels, reservedTypeNames){
 			_.errout('The keratin format only permits one level of indentation (properties may not have sub-properties.)');
 		}
 		
+		if(obj.properties[r.tokens[0]]) _.errout('duplicate property name "' + r.tokens[0] + '" for ' + obj.name)
 		obj.properties[r.tokens[0]] = rel;
 		obj.propertiesByCode[rel.code] = rel;
 	});
@@ -101,7 +102,7 @@ function keratinize(schema, reservedTypeNames){
 	var result = {_byCode: {}};
 	
 	var takenCodes = {};
-	
+	var codeNames = {}
 	_.each(schema.children, function(v){
 		
 		var code = v.tokens[1];
@@ -109,9 +110,10 @@ function keratinize(schema, reservedTypeNames){
 
 		if(name.indexOf('(') !== -1) return//TODO remove this coupling between minnow/shared/schema.js and keratin
 		
-		if(takenCodes[code]){
+		if(takenCodes[code] && codeNames[code] !== name){
 			_.errout('object ' + name + ' is using a code that is already taken: ' + code);
 		}
+		codeNames[code] = name
 		takenCodes[code] = true;
 		var obj = {
 			name: name,
@@ -132,8 +134,19 @@ function keratinize(schema, reservedTypeNames){
 		
 		parseProperties(obj, v.children, reservedTypeNames);
 		
-		result[obj.name] = obj;
-		result._byCode[obj.code] = obj;
+		if(result[obj.name]){
+			if(result[obj.name].code !== obj.code){
+				_.errout('duplicate name already taken: ' + obj.name)	
+			}else{
+				_.each(obj.properties, function(prop, name){
+					result[obj.name].properties[name] = prop
+					result[obj.name].propertiesByCode[prop.code] = prop
+				})				
+			}
+		}else{
+			result[obj.name] = obj;
+			result._byCode[obj.code] = obj;
+		}
 	});
 
 	function extendProperties(objSchema){
