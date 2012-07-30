@@ -108,7 +108,8 @@ function keratinize(schema, reservedTypeNames){
 		var code = v.tokens[1];
 		var name = v.tokens[0]
 
-		if(name.indexOf('(') !== -1) return//TODO remove this coupling between minnow/shared/schema.js and keratin
+		
+		if(name.indexOf('(') !== -1 || v.string.indexOf(':=') !== -1) return//TODO remove this coupling between minnow/shared/schema.js and keratin
 		
 		if(takenCodes[code] && codeNames[code] !== name){
 			_.errout('object ' + name + ' is using a code that is already taken: ' + code);
@@ -123,6 +124,9 @@ function keratinize(schema, reservedTypeNames){
 			properties: {},
 			propertiesByCode: {}
 		};
+
+		//_.assertInt(obj.code)
+		if(!_.isInt(obj.code)) _.errout('must provide integer code for object type: ' + name);
 
 		if(reservedTypeNames.indexOf(obj.name) !== -1) _.errout('invalid name, reserved: ' + obj.name);
 		
