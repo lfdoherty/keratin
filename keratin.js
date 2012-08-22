@@ -48,6 +48,8 @@ function parseType(t){
 		if(t === 'bool') t = 'boolean';
 		return {type: 'primitive', primitive: t};
 	}else{
+		_.assertDefined(t)
+		_.assert(t !== 'undefined')
 		return {type: 'object', object: t};
 	}
 }
@@ -58,6 +60,8 @@ function parseProperties(obj, rels, reservedTypeNames){
 	var takenCodes = {};
 
 	_.each(rels, function(r){
+		
+		_.assert(r.tokens.length >= 3)
 		
 		var rel = {
 			name: r.tokens[0],
@@ -153,13 +157,48 @@ function keratinize(schema, reservedTypeNames){
 		}
 	});
 
+	//check valid names for object property types
+	_.each(result._byCode, function(v){
+		_.each(v.properties, function(p, n){
+		//	console.log('checking: ' + JSON.stringify(p))
+			if(p.type.type === 'set' || p.type.type === 'list'){
+				if(p.type.members.type === 'object'){
+					if(result[p.type.members.object] === undefined) _.errout('object type referenced but not defined (in ' + v.name + '): ' + p.type.members.object)
+				}
+			}else if(p.type.type === 'map'){
+				if(p.type.key.type === 'object'){
+					if(result[p.type.key.object] === undefined) _.errout('object type referenced but not defined (in ' + v.name + '): ' + p.type.key.object)
+				}
+				if(p.type.value.type === 'object'){
+					if(result[p.type.value.object] === undefined) _.errout('object type referenced but not defined (in ' + v.name + '): ' + p.type.value.object)
+				}
+			}else if(p.type.type === 'object'){
+				if(result[p.type.object] === undefined) _.errout('object type referenced but not defined (in ' + v.name + '): ' + p.type.object)
+			}
+		})
+	})
+	
 	function extendProperties(objSchema){
 		_.each(objSchema.superTypes, function(dummy, sn){
 			var st = result[sn];
 			if(st){
 				extendProperties(st);
-				_.extend(objSchema.properties, st.properties)
-				_.extend(objSchema.propertiesByCode, st.propertiesByCode)
+				//_.extend(objSchema.properties, st.properties)
+				_.each(st.properties, function(prop, key){
+					if(objSchema.properties[key] === prop) return
+					if(objSchema.properties[key]){
+						_.errout('name collision between ' + objSchema.name + '.' + key + ' and super type\'s ' + st.name + '.' + key)
+					}
+					objSchema.properties[key] = prop
+				})
+				_.each(st.propertiesByCode, function(prop, key){
+					if(objSchema.propertiesByCode[key] === prop) return
+					if(objSchema.propertiesByCode[key]){
+						_.errout('type code collision between ' + objSchema.name + '.' + objSchema.propertiesByCode[key].name + ' and super type property ' + st.name + '.' + prop.name + ', both use type code: ' + key)
+					}
+					objSchema.propertiesByCode[key] = prop
+				})
+				//_.extend(objSchema.propertiesByCode, st.propertiesByCode)
 			}
 		})
 	}
