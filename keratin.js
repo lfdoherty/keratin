@@ -24,7 +24,7 @@ function startsWith(str, prefix){
 	return str.indexOf(prefix) === 0;
 }
 
-var primitiveTypes = ['string', 'int', 'boolean', 'long', 'timestamp', 'binary', 'byte', 'bool', 'real', 'primitive'];
+var primitiveTypes = ['string', 'int', 'boolean', 'long',/* 'timestamp',*/ 'binary', 'byte', 'bool', 'real', 'primitive'];
 var primitiveTypesMap = {};
 for(var i=0;i<primitiveTypes.length;++i){primitiveTypesMap[primitiveTypes[i]] = true;}
 function isPrimitive(t){
@@ -66,10 +66,10 @@ function parseProperties(obj, rels, reservedTypeNames){
 		var rel = {
 			name: r.tokens[0],
 			type: parseType(r.tokens[1]),
-			code: parseInt(r.tokens[2]),
-			tags: {},
-			properties: {},
-			propertiesByCode: {}
+			code: parseInt(r.tokens[2])//,
+			//tags: {},
+			//properties: {},
+			//propertiesByCode: {}
 		};
 		
 		if(takenCodes[rel.code] !== undefined){
@@ -83,6 +83,7 @@ function parseProperties(obj, rels, reservedTypeNames){
 		
 		if(r.tokens.length > 3){
 			_.each(r.tokens.slice(3), function(t){
+				if(!rel.tags) rel.tags = {}
 				rel.tags[t] = true;
 			});
 		}
@@ -92,6 +93,10 @@ function parseProperties(obj, rels, reservedTypeNames){
 			_.errout('The keratin format only permits one level of indentation (properties may not have sub-properties.)');
 		}
 		
+		if(obj.properties === undefined){
+			obj.properties = {}
+			obj.propertiesByCode = {}
+		}
 		if(obj.properties[r.tokens[0]]) _.errout('duplicate property name "' + r.tokens[0] + '" for ' + obj.name)
 		obj.properties[r.tokens[0]] = rel;
 		obj.propertiesByCode[rel.code] = rel;
@@ -123,10 +128,10 @@ function keratinize(schema, reservedTypeNames){
 		var obj = {
 			name: name,
 			code: parseInt(code),
-			superTypes: {},
-			subTypes: {},
-			properties: {},
-			propertiesByCode: {}
+			//superTypes: {},
+			//subTypes: {},
+			//properties: {},
+			//propertiesByCode: {}
 		};
 
 		//_.assertInt(obj.code)
@@ -136,19 +141,26 @@ function keratinize(schema, reservedTypeNames){
 		
 		if(v.tokens.length > 2){
 			_.each(v.tokens.slice(2), function(t){
+				if(obj.superTypes === undefined) obj.superTypes = {}
 				obj.superTypes[t] = true;
 			});
 		}
 		
 		parseProperties(obj, v.children, reservedTypeNames);
 		
-		if(result[obj.name]){
-			if(result[obj.name].code !== obj.code){
+		var rn = result[obj.name]
+		
+		if(rn){
+			if(rn.code !== obj.code){
 				_.errout('duplicate name already taken: ' + obj.name)	
 			}else{
+				if(rn.properties === undefined){
+					rn.properties = {}
+					rn.propertiesByCode = {}
+				}
 				_.each(obj.properties, function(prop, name){
-					result[obj.name].properties[name] = prop
-					result[obj.name].propertiesByCode[prop.code] = prop
+					rn.properties[name] = prop
+					rn.propertiesByCode[prop.code] = prop
 				})				
 			}
 		}else{
@@ -185,6 +197,10 @@ function keratinize(schema, reservedTypeNames){
 				extendProperties(st);
 				//_.extend(objSchema.properties, st.properties)
 				_.each(st.properties, function(prop, key){
+					if(objSchema.properties === undefined){
+						objSchema.properties = {}
+						objSchema.propertiesByCode = {}
+					}
 					if(objSchema.properties[key] === prop) return
 					if(objSchema.properties[key]){
 						_.errout('name collision between ' + objSchema.name + '.' + key + ' and super type\'s ' + st.name + '.' + key)
