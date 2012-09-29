@@ -261,12 +261,13 @@ function stringizeSchema(schema, name, code, unknownTypeHandler){
 	var entityTagStr = (schema.tags ? ' ' + _.keys(schema.tags).join(' ') : '');
 	s += name + ' ' + code + entityTagStr + '\n';
 
-	_.each(schema.properties, function(rel, relName){
-		if(isNaN(parseInt(relName))){
-			var tagStr = (rel.tags ? ' ' + _.keys(rel.tags).join(' ') : '');
-			s += '\t' + relName + ' ' + stringizeType(rel.type, unknownTypeHandler) + ' ' + rel.code + tagStr + '\n';
-		}
-	});
-
+	if(schema.properties !== undefined){
+		_.each(schema.properties, function(rel, relName){
+			if(isNaN(parseInt(relName))){
+				var tagStr = (rel.tags ? ' ' + _.keys(rel.tags).join(' ') : '');
+				s += '\t' + relName + ' ' + stringizeType(rel.type, unknownTypeHandler) + ' ' + rel.code + tagStr + '\n';
+			}
+		});
+	}
 	return s;
 }
