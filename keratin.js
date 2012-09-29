@@ -170,9 +170,11 @@ function keratinize(schema, reservedTypeNames){
 	});
 
 	//check valid names for object property types
-	_.each(result._byCode, function(v){
-		_.each(v.properties, function(p, n){
-		//	console.log('checking: ' + JSON.stringify(p))
+	Object.keys(result._byCode).forEach(function(key){
+		var v = result._byCode[key]
+		if(v.properties === undefined) return
+		Object.keys(v.properties).forEach(function(n){
+			var p = v.properties[n]
 			if(p.type.type === 'set' || p.type.type === 'list'){
 				if(p.type.members.type === 'object'){
 					if(result[p.type.members.object] === undefined) _.errout('object type referenced but not defined (in ' + v.name + '): ' + p.type.members.object)
