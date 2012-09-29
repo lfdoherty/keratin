@@ -193,6 +193,8 @@ function keratinize(schema, reservedTypeNames){
 	})
 	
 	function extendProperties(objSchema){
+		if(objSchema.superTypes === undefined) return
+		
 		_.each(objSchema.superTypes, function(dummy, sn){
 			var st = result[sn];
 			if(st){
