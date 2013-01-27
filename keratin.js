@@ -61,7 +61,10 @@ function parseProperties(obj, rels, reservedTypeNames){
 
 	_.each(rels, function(r){
 		
-		_.assert(r.tokens.length >= 3)
+		//_.assert(r.tokens.length >= 3)
+		if(r.tokens.length < 3){
+			_.errout('invalid property: ' + JSON.stringify(r))
+		}
 		
 		var rel = {
 			name: r.tokens[0],
