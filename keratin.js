@@ -6,6 +6,7 @@ var _ = require('underscorem');
 exports.parse = parse;
 exports.parseType = parseType;
 exports.stringize = stringizeSchema;
+exports.stringizeType = stringizeType
 
 function parse(str, reservedTypeNames){
 	_.assert(arguments.length >= 1);
@@ -268,6 +269,7 @@ function stringizeSchema(schema, name, code, unknownTypeHandler){
 		_.each(schema.properties, function(rel, relName){
 			if(isNaN(parseInt(relName))){
 				var tagStr = (rel.tags ? ' ' + _.keys(rel.tags).join(' ') : '');
+				if(rel.type == undefined) _.errout('missing type: ' + JSON.stringify(rel))
 				s += '\t' + relName + ' ' + stringizeType(rel.type, unknownTypeHandler) + ' ' + rel.code + tagStr + '\n';
 			}
 		});
