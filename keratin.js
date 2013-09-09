@@ -25,7 +25,7 @@ function startsWith(str, prefix){
 	return str.indexOf(prefix) === 0;
 }
 
-var primitiveTypes = ['string', 'int', 'boolean', 'long',/* 'timestamp',*/ 'binary', 'byte', 'bool', 'real', 'primitive'];
+var primitiveTypes = ['string', 'int', 'boolean', 'long',/* 'timestamp',*/ 'binary', 'byte', 'bool', 'real', 'primitive', 'uuid'];
 var primitiveTypesMap = {};
 for(var i=0;i<primitiveTypes.length;++i){primitiveTypesMap[primitiveTypes[i]] = true;}
 function isPrimitive(t){
@@ -90,7 +90,9 @@ function parseProperties(obj, rels, reservedTypeNames){
 				if(!rel.tags) rel.tags = {}
 				rel.tags[t] = true;
 			});
+			//console.log(JSON.stringify(rel))
 		}
+		
 		
 		//'children' of rels are not allowed in the keratin format
 		if(r.children.length > 0){
